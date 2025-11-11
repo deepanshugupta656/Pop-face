@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pop Your Face</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <header class="topbar">
+    <h1>🎈 Pop Your Face!</h1>
+  </header>
+
+  <main class="controls">
+
+    <div class="picker">
+      <label class="lbl">Upload an image</label>
+      <input type="file" id="imgUpload" accept="image/*"/>
+    </div>
+
+    <div class="picker">
+      <label class="lbl">...or paste image URL</label>
+      <input type="url" id="imgUrl" placeholder="https://example.com/photo.png"/>
+    </div>
+
+    <div class="actions">
+      <button id="startBtn">Start</button>
+      <button id="restartBtn" disabled>Restart</button>
+      <button id="pauseBtn" disabled>Pause</button>
+      <button id="resumeBtn" disabled>Resume</button>
+      <button id="stopBtn" disabled>Stop</button>
+
+      <!-- sound effects -->
+      <label class="toggle">
+        <input type="checkbox" id="soundToggle" checked/>
+        <span>SFX</span>
+      </label>
+
+      <!-- Zen -->
+      <label class="toggle">
+        <input type="checkbox" id="zenToggle"/>
+        <span>Zen</span>
+      </label>
+
+      <!-- ✅ NEW: Music select -->
+      <label class="toggle">
+        <select id="musicSelect">
+          <option value="none">No Music</option>
+          <option value="calm">Calm</option>
+          <option value="fun">Fun</option>
+        </select>
+      </label>
+
+    </div>
+  </main>
+
+  <section id="hud">
+    <div>Score: <span id="score">0</span></div>
+    <div>Best: <span id="bestScore">0</span></div>
+    <div>Alive: <span id="aliveCount">0</span></div>
+  </section>
+
+  <section id="gameArea" aria-label="Game area"></section>
+
+  <footer class="footer">
+    <p>Tap to POP & release stress ✨</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
