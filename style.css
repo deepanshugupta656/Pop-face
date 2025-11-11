@@ -6,71 +6,85 @@
   --accent:#0077b6;
   --shadow:0 10px 25px rgba(0,0,0,.12);
 }
+
+/* Mobile UX helpers */
 html,body{height:100%}
+html, body {
+  overscroll-behavior: none;
+  background:linear-gradient(180deg, var(--bg), #eaf7ff);
+}
 body{
   margin:0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   color:var(--ink);
-  background:linear-gradient(180deg, var(--bg), #eaf7ff);
-  display:flex; flex-direction:column; gap:12px;
+  display:flex; flex-direction:column; gap:10px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
+
 .topbar{
   text-align:center;
-  padding:14px 10px;
+  padding:12px 10px;
 }
-.topbar h1{margin:0; font-weight:800; letter-spacing:.3px;}
+.topbar h1{
+  margin:0; font-weight:800; letter-spacing:.3px;
+  font-size:clamp(18px,4.8vw,28px);
+}
+
 .controls{
-  display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; justify-content:center;
-  padding:0 12px;
+  display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; justify-content:center;
+  padding:0 10px;
 }
 .picker{
   display:flex; flex-direction:column; gap:6px;
   background:var(--panel); padding:10px; border-radius:14px;
-  box-shadow:var(--shadow)
+  box-shadow:var(--shadow); min-width:min(260px, 96vw);
 }
+.picker input{max-width:100%}
 .lbl{font-size:.9rem; opacity:.8}
 .actions{
-  display:flex; gap:10px;
-  align-items:center;
-  background:var(--panel);
-  padding:10px; border-radius:14px;
-  box-shadow:var(--shadow)
+  display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
+  align-items:center; background:var(--panel);
+  padding:10px; border-radius:14px; box-shadow:var(--shadow);
+  width:min(860px, 96vw);
 }
-.actions button{
+.actions button, .actions select{
   appearance:none; border:0; border-radius:12px;
-  padding:10px 14px;
-  font-weight:700; cursor:pointer;
-  background:var(--accent); color:white;
-  box-shadow:var(--shadow); transition:transform .06s ease;
+  padding:10px 14px; font-weight:700; cursor:pointer;
+  background:var(--accent); color:white; box-shadow:var(--shadow);
+  transition:transform .06s ease; font-size:clamp(12px,3.6vw,16px);
 }
+.actions select{ background:#0ea5e9; }
 .actions button:disabled{opacity:.6; cursor:not-allowed}
 .actions button:active{transform:translateY(1px)}
 .toggle{
   display:flex; gap:6px; align-items:center;
   padding:4px 8px; border-radius:10px;
-  background:#f2fbff; border:1px solid #cfe8ff
+  background:#f2fbff; border:1px solid #cfe8ff; color:#09354a;
 }
 
 #hud{
-  display:flex; gap:16px; justify-content:center;
-  font-weight:700;
+  display:flex; gap:14px; justify-content:center; font-weight:700;
+  font-size:clamp(12px,3.8vw,16px);
+  transition: opacity .25s ease;
+  padding:0 10px;
 }
 
+/* Use small-viewport units to avoid mobile URL bar jumps */
 #gameArea{
   position:relative; margin:0 10px; border-radius:16px;
-  height:62vh; min-height:360px;
+  height: min(68svh, 620px);
+  min-height: 320px;
   background:#bfe7ff;
-  overflow:hidden;
-  box-shadow:var(--shadow);
-  border:2px solid #a7d7f7;
+  overflow:hidden; box-shadow:var(--shadow); border:2px solid #a7d7f7;
 }
 
 .footer{
-  text-align:center;
-  font-size:.9rem; opacity:.85;
-  padding:0 10px 14px;
+  text-align:center; font-size:clamp(12px,3.4vw,14px); opacity:.85;
+  padding:0 10px 12px;
 }
 
+/* Faces */
 .face{
   position:absolute; border-radius:50%;
   user-select:none; -webkit-user-drag:none;
@@ -80,24 +94,18 @@ body{
 }
 .face:active{ transform: scale(.92);}
 
-/* basic pop */
-.pop{
-  animation: burst 280ms ease forwards;
-}
+/* Pop */
+.pop{ animation: burst 280ms ease forwards; }
 @keyframes burst{
   0%{ transform:scale(1); opacity:1;}
   60%{ transform:scale(1.25);}
   100%{ transform:scale(0); opacity:0;}
 }
 
-/* confetti */
+/* Confetti */
 .particle{
-  position:absolute;
-  width:8px; height:8px;
-  border-radius:50%;
-  pointer-events:none;
-  opacity:.95;
-  animation: fly 620ms ease-out forwards;
+  position:absolute; width:8px; height:8px; border-radius:50%;
+  pointer-events:none; opacity:.95; animation: fly 620ms ease-out forwards;
   background: hsl(var(--h, 200) 90% 55%);
 }
 @keyframes fly{
@@ -105,13 +113,10 @@ body{
   100%{ transform:translate(var(--dx), var(--dy)) scale(.4); opacity:0;}
 }
 
-/* ripple ring */
+/* Ripple */
 .ring{
-  position:absolute;
-  width:12px; height:12px;
-  border-radius:50%;
-  border:2px solid rgba(255,255,255,.9);
-  pointer-events:none;
+  position:absolute; width:12px; height:12px; border-radius:50%;
+  border:2px solid rgba(255,255,255,.9); pointer-events:none;
   animation: ripple 420ms ease-out forwards;
   box-shadow:0 0 0 2px rgba(255,255,255,.6) inset;
 }
@@ -120,22 +125,31 @@ body{
   100%{ transform:translate(-50%,-50%) scale(3.2); opacity:0;}
 }
 
-/* BOUNCE TEXT */
+/* Word animations */
 @keyframes kuttiBounce {
   0%   { transform: translate(-50%, -50%) scale(1);   opacity: 1; }
   30%  { transform: translate(-50%, -80%) scale(1.25);}
   60%  { transform: translate(-50%, -120%) scale(1);  }
   100% { transform: translate(-50%, -160%) scale(0.8); opacity: 0; }
 }
-
-.kuttiText {
-  position:absolute;
-  z-index:5; /* ensure above faces */
-  font-size:20px;
-  font-weight:800;
-  color:#ff006e;
-  pointer-events:none;
-  transform: translate(-50%, -50%);  /* anchor center */
-  animation: kuttiBounce 0.75s ease-out forwards;
+@keyframes hueSpin {
+  0%   { filter: hue-rotate(0deg)   brightness(1);   transform: translate(-50%,-50%) rotate(0deg); }
+  100% { filter: hue-rotate(360deg) brightness(1.05); transform: translate(-50%,-50%) rotate(360deg); }
+}
+.kuttiText{
+  position:absolute; z-index:5; font-size:clamp(16px,6vw,22px); font-weight:800;
+  color:#ff006e; pointer-events:none; transform: translate(-50%, -50%);
+  animation: kuttiBounce 0.9s ease-out forwards, hueSpin 0.9s linear forwards;
   text-shadow:0 0 8px rgba(255,0,120,0.6);
+}
+
+/* Zen visuals */
+body.zen #hud { opacity: .25; }
+body.zen #gameArea { background: linear-gradient(180deg, #eaf7ff, #cfeeff); }
+
+/* Super small screens */
+@media (max-width:420px){
+  .actions{gap:6px}
+  .actions button, .actions select{ padding:8px 10px; }
+  #gameArea{ height: 62svh; }
 }
