@@ -1,4 +1,4 @@
-// Pop Your Face – Zen + Music + Full Build
+// Pop Your Face – Mobile responsive + centered word + Zen mode + Music + SFX + pause/resume/stop
 
 const gameArea   = document.getElementById("gameArea");
 const scoreEl    = document.getElementById("score");
@@ -15,7 +15,7 @@ const imgUpload  = document.getElementById("imgUpload");
 const imgUrl     = document.getElementById("imgUrl");
 const soundToggle= document.getElementById("soundToggle");
 const zenToggle  = document.getElementById("zenToggle");
-const musicSelect= document.getElementById("musicSelect");   // ✅ NEW
+const musicSelect= document.getElementById("musicSelect");
 
 let faceSrc = "";
 let running = false;
@@ -29,13 +29,13 @@ let spawnTimer = 0;
 let faces = new Set();
 bestEl.textContent = best;
 
-// ✅ Funny words
+// funny words list
 const funnyWords = [
   "kutti","ullu","pagal","bewakoof","bhakk",
   "nalle","jhalla","gadha","faltu","bewaqoof"
 ];
 
-// ✅ POP sound (SFX)
+// POP SFX
 let audioCtx;
 function playPop(){
   if(!soundToggle.checked) return;
@@ -54,13 +54,11 @@ function playPop(){
   o.stop(ctx.currentTime+0.14);
 }
 
-// ✅ NEW — Music
+// Music (local files calm.mp3 / fun.mp3 or change to URLs)
 let music = null;
-
 function playMusic(){
   stopMusic();
   const choice = musicSelect.value;
-
   if(choice === "none") return;
 
   let file = "";
@@ -69,23 +67,19 @@ function playMusic(){
 
   music = new Audio(file);
   music.loop = true;
-  music.volume = 0.6;      // Adjust volume here
-  music.play();
+  music.volume = 0.6;
+  // starts after user interaction (Start)
+  music.play().catch(()=>{/* browsers may block until user interaction */});
 }
-
 function stopMusic(){
   if(music){
     music.pause();
     music = null;
   }
 }
+musicSelect.addEventListener("change", ()=> { if(running) playMusic(); });
 
-// ✅ Auto change music when selection changes
-musicSelect.addEventListener("change", ()=>{
-  if(running) playMusic();
-});
-
-// image selection
+// Image selection
 function setFaceFromFile(file){
   const reader=new FileReader();
   reader.onload=e=> faceSrc=e.target.result;
@@ -119,7 +113,6 @@ function startGame(){
   faces.forEach(f=>f.el.remove());
   faces.clear();
   aliveEl.textContent="0";
-
   spawnTimer=0;
 
   startBtn.disabled=true;
@@ -128,8 +121,7 @@ function startGame(){
   pauseBtn.disabled=false;
   resumeBtn.disabled=true;
 
-  // ✅ start music
-  playMusic();
+  playMusic();  // start music based on selection
 
   lastTime=performance.now();
   loop(performance.now());
@@ -144,15 +136,15 @@ function stopGame(){
   stopBtn.disabled=true;
   pauseBtn.disabled=true;
   resumeBtn.disabled=true;
+
   faces.forEach(f=>f.el.remove());
   faces.clear();
   aliveEl.textContent="0";
 
-  // ✅ stop music
   stopMusic();
 }
 
-// --- Utility: exact center of an element inside gameArea
+// exact center of element within gameArea
 function getCenterInGame(el){
   const ar = gameArea.getBoundingClientRect();
   const er = el.getBoundingClientRect();
@@ -162,131 +154,138 @@ function getCenterInGame(el){
 }
 
 function spawnFace(){
-  const el=document.createElement("img");
-  el.src=faceSrc;
-  el.className="face";
-  const size = rand(60,120);
-  el.style.width=size+"px";
-  el.style.height=size+"px";
+  const el = document.createElement("img");
+  el.src = faceSrc;
+  el.className = "face";
 
-  const areaRect=gameArea.getBoundingClientRect();
-  const x=rand(0,areaRect.width-size);
-  const y=areaRect.height+size;
-  el.style.left=x+"px";
-  el.style.top=y+"px";
+  const areaRect = gameArea.getBoundingClientRect();
+
+  // Responsive size: 12–22% of game width, clamped 56–140px
+  const minPx = 56, maxPx = 140;
+  const minW = areaRect.width * 0.12;
+  const maxW = areaRect.width * 0.22;
+  const size = Math.max(minPx, Math.min(maxPx, Math.random() * (maxW - minW) + minW));
+
+  el.style.width  = size + "px";
+  el.style.height = size + "px";
+
+  const x = Math.random() * (areaRect.width - size);
+  const y = areaRect.height + size;
+  el.style.left = x + "px";
+  el.style.top  = y + "px";
 
   // Calmer in Zen
   const vyMin = zen ? 20 : 40;
   const vyMax = zen ? 55 : 90;
   const vxAbs = zen ? 15 : 25;
 
-  const face={el,x,y,size,vy:rand(vyMin,vyMax),vx:rand(-vxAbs,vxAbs),alive:true};
+  const face = { el, x, y, size, vy: rand(vyMin,vyMax), vx: rand(-vxAbs,vxAbs), alive: true };
 
-  const pop=()=>{
+  const pop = () => {
     if(paused) return;
     if(!face.alive) return;
-    face.alive=false;
+    face.alive = false;
 
     if(!zen){
       score++;
-      scoreEl.textContent=score;
-      if(score>best){
-        best=score;
-        localStorage.setItem("pyf_best",best);
-        bestEl.textContent=best;
+      scoreEl.textContent = String(score);
+      if(score > best){
+        best = score;
+        localStorage.setItem("pyf_best", String(best));
+        bestEl.textContent = String(best);
       }
     }
 
     const { cx, cy } = getCenterInGame(el);
-
-    spawnParticles(cx,cy, zen ? 10 : 14);
-    spawnRing(cx,cy);
-    spawnKutti(cx,cy);
+    spawnParticles(cx, cy, zen ? 10 : 14);
+    spawnRing(cx, cy);
+    spawnKutti(cx, cy);
     playPop();
 
     el.classList.add("pop");
-    setTimeout(()=>el.remove(),260);
+    setTimeout(()=> el.remove(), 260);
     faces.delete(face);
-    aliveEl.textContent=faces.size;
+    aliveEl.textContent = String(faces.size);
   };
 
-  el.addEventListener("click",pop,{passive:true});
-  el.addEventListener("touchstart",pop,{passive:true});
+  el.addEventListener("click", pop, { passive: true });
+  el.addEventListener("touchstart", pop, { passive: true });
+
   gameArea.appendChild(el);
   faces.add(face);
-  aliveEl.textContent=faces.size;
+  aliveEl.textContent = String(faces.size);
 }
 
-function spawnParticles(cx,cy,count=12){
+function spawnParticles(cx, cy, count=12){
   for(let i=0;i<count;i++){
-    const p=document.createElement("div");
-    p.className="particle";
-    const ang=Math.random()*Math.PI*2;
-    const dist=(zen?40:60)+Math.random()*(zen?60:80);
-    const dx=Math.cos(ang)*dist, dy=Math.sin(ang)*dist*0.8;
-    p.style.setProperty("--dx",dx.toFixed(1)+"px");
-    p.style.setProperty("--dy",dy.toFixed(1)+"px");
-    p.style.setProperty("--h",Math.floor(Math.random()*360));
-    p.style.left=cx+"px";
-    p.style.top=cy+"px";
+    const p = document.createElement("div");
+    p.className = "particle";
+    const ang = Math.random() * Math.PI * 2;
+    const dist = (zen?40:60) + Math.random() * (zen?60:80);
+    const dx = Math.cos(ang) * dist, dy = Math.sin(ang) * dist * 0.8;
+    p.style.setProperty("--dx", dx.toFixed(1)+"px");
+    p.style.setProperty("--dy", dy.toFixed(1)+"px");
+    p.style.setProperty("--h", Math.floor(Math.random()*360));
+    p.style.left = cx + "px";
+    p.style.top  = cy + "px";
     gameArea.appendChild(p);
-    p.addEventListener("animationend",()=>p.remove(),{once:true});
+    p.addEventListener("animationend", ()=> p.remove(), {once:true});
   }
 }
 
-function spawnRing(cx,cy){
-  const r=document.createElement("div");
-  r.className="ring";
-  r.style.left=cx+"px";
-  r.style.top=cy+"px";
+function spawnRing(cx, cy){
+  const r = document.createElement("div");
+  r.className = "ring";
+  r.style.left = cx + "px";
+  r.style.top  = cy + "px";
   gameArea.appendChild(r);
-  r.addEventListener("animationend",()=>r.remove(),{once:true});
+  r.addEventListener("animationend", ()=> r.remove(), {once:true});
 }
 
-function spawnKutti(cx,cy){
+function spawnKutti(cx, cy){
   const word = funnyWords[Math.floor(Math.random()*funnyWords.length)];
-  const t=document.createElement("div");
-  t.textContent=word;
-  t.className="kuttiText";
-
-  // random color
+  const t = document.createElement("div");
+  t.textContent = word;
+  t.className = "kuttiText";
+  // random base color (hueSpin will rotate over time)
   const hue = Math.floor(Math.random()*360);
   t.style.color = `hsl(${hue} 95% 55%)`;
-
-  t.style.left=cx+"px";
-  t.style.top=cy+"px";
+  t.style.left = cx + "px";
+  t.style.top  = cy + "px";
   gameArea.appendChild(t);
-  setTimeout(()=>t.remove(),900);
+  setTimeout(()=> t.remove(), 900);
 }
 
 // Main loop
-let lastTime=0;
+let lastTime = 0;
 function loop(t){
   if(!running) return;
   if(paused){ requestAnimationFrame(loop); return; }
 
-  const dt=Math.min(0.034,(t-lastTime)/1000);
-  lastTime=t;
+  const dt = Math.min(0.034, (t - lastTime)/1000);
+  lastTime = t;
 
-  spawnTimer-=dt;
-  if(spawnTimer<=0){
+  // spawn (slower in zen)
+  spawnTimer -= dt;
+  if(spawnTimer <= 0){
     spawnFace();
     spawnTimer = zen ? rand(0.8,1.4) : rand(0.45,0.95);
   }
 
-  const areaRect=gameArea.getBoundingClientRect();
+  // move faces
+  const areaRect = gameArea.getBoundingClientRect();
   for(const f of Array.from(faces)){
-    f.y-=f.vy*dt;
-    f.x+=f.vx*dt;
-    if(f.x<0||f.x>areaRect.width-f.size) f.vx*=-1;
+    f.y -= f.vy * dt;
+    f.x += f.vx * dt;
+    if(f.x < 0 || f.x > areaRect.width - f.size) f.vx *= -1;
 
-    f.el.style.top=f.y+"px";
-    f.el.style.left=f.x+"px";
+    f.el.style.top  = f.y + "px";
+    f.el.style.left = f.x + "px";
 
-    if(f.y < -f.size-20){
+    if(f.y < -f.size - 20){
       f.el.remove();
       faces.delete(f);
-      aliveEl.textContent=faces.size;
+      aliveEl.textContent = String(faces.size);
     }
   }
   requestAnimationFrame(loop);
